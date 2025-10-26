@@ -29,6 +29,6 @@ public class UserModel {
     @Column(nullable = false)
     private UserRole role;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String refreshToken;
 }
