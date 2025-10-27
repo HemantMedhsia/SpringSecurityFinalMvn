@@ -77,7 +77,7 @@ public class AuthServiceImpl implements AuthService{
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
-                .path("/api/v1/auth/refresh")
+                .path("/")
                 .maxAge(Duration.ofHours(1))
                 .build();
 
@@ -123,7 +123,7 @@ public class AuthServiceImpl implements AuthService{
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
-                .path("/api/v1/auth/refresh")
+                .path("/")
                 .maxAge(Duration.ofMinutes(3))
                 .build();
 
@@ -214,7 +214,7 @@ public class AuthServiceImpl implements AuthService{
                 .httpOnly(true)
                 .secure(true)
                 .sameSite("None")
-                .path("/api/v1/auth/")
+                .path("/")
                 .maxAge(0)
                 .build();
 
