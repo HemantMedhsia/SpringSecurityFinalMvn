@@ -21,9 +21,9 @@ import java.util.Map;
 public class JwtService {
     @Value("${security.jwt.secret}")
     private String secret;
-    @Value("${security.jwt.access-exp-minutes:1}")
+    @Value("${security.jwt.access-exp-minutes:10}")
     private long accessExpMinutes;
-    @Value("${security.jwt.refresh-exp-days:3}")
+    @Value("${security.jwt.refresh-exp-days:30}")
     private long refreshExpDays;
     @Value("${security.jwt.refresh-abs-exp-days:10}")
     private long refreshAbsExpDays;
