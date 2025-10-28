@@ -49,10 +49,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
          try {
              username = jwtService.extractUsername(token);
          } catch (ExpiredJwtException e) {
-             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-             response.setContentType("application/json");
-             response.getWriter().write("{\"status\":\"fail\",\"message\":\"Token expired\"}");
-             return;
+        	    
+        	    String clearAccessCookie = "access_token=; Path=/; Max-Age=0;  HttpOnly";
+        	    String clearRefreshCookie = "refresh_token=; Path=/; Max-Age=0; HttpOnly";
+
+
+        	    response.setHeader("Set-Cookie", clearAccessCookie);
+        	    response.addHeader("Set-Cookie", clearRefreshCookie);
+
+        	    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        	    response.setContentType("application/json");
+        	    response.getWriter().write("{\"status\":\"fail\",\"message\":\"Token expired\"}");
+        	    return;
+        	
         }  catch (Exception e) {
              response.setStatus(HttpStatus.UNAUTHORIZED.value());
              response.setContentType("application/json");
