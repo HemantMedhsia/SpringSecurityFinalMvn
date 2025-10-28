@@ -21,7 +21,7 @@ public class CorsConfig {
 
         cfg.setAllowedOrigins(List.of("http://localhost:5173"));
         cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "Cookie"));
+        cfg.setAllowedHeaders(List.of("*"));
         cfg.setAllowCredentials(true);
         cfg.addExposedHeader("Authorization");
         cfg.addExposedHeader("Set-Cookie");
