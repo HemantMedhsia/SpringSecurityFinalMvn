@@ -70,8 +70,8 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public ResponseEntity<ResponseStructure<ExpenseResponseDto>> updateExpense(Long id, AddExpenseDto updatedExpense) {
+    	
         UserModel currentUser = getCurrentUser();
-
         ExpenseModel expense = expenseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Expense not found with id: " + id));
 
@@ -90,7 +90,11 @@ public class ExpenseServiceImpl implements ExpenseService {
         ExpenseModel updated = expenseRepository.save(expense);
         ExpenseResponseDto responseDto = mapToDto(updated);
 
-        return ApiResponse.success(responseDto, "Expense updated successfully", HttpStatus.OK);
+        return ApiResponse.success(
+        		responseDto, 
+        		"Expense updated successfully", 
+        		HttpStatus.OK
+        		);
     }
 
     @Override
