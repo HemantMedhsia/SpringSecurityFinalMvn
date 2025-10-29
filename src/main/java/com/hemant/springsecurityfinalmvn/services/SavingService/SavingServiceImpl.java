@@ -1,9 +1,12 @@
 package com.hemant.springsecurityfinalmvn.services.SavingService;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -28,12 +31,17 @@ public class SavingServiceImpl implements SavingService {
 	private final UserRepo userRepo;
 	private final SavingRepo savingRepo;
 	
+	
+	 private UserModel getCurrentUser() {
+	        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+	        return userRepo.findByEmail(email)
+	                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+	    }
+	
 	@Override
 	public ResponseEntity<ResponseStructure<SavingResponseDto>> createSaving(AddSavingDto savingDto) {
 		
-	    String userEmail = SecurityContextHolder.getContext().getAuthentication().getName();
-	    UserModel currentUser = userRepo.findByEmail(userEmail)
-	            .orElseThrow(() -> new RuntimeException("User not found with email: " + userEmail));
+		UserModel currentUser = getCurrentUser();
 
 	    SavingsModel saving = SavingsModel.builder()
 	            .category(savingDto.category())
@@ -63,6 +71,57 @@ public class SavingServiceImpl implements SavingService {
 
 	    return ApiResponse.success(responseDto, "Saving created successfully", HttpStatus.CREATED);
 	}
+	
+	
+	@Override
+	public ResponseEntity<ResponseStructure<SavingResponseDto>> getSavingById(Long id){
+		UserModel currentUser = getCurrentUser();
+		
+		SavingsModel saving = savingRepo.findById(id)
+				.orElseThrow(()-> new RuntimeException("Saving not found with id "+id));
+		
+		 if (!saving.getOwner().getId().equals(currentUser.getId())) {
+	            throw new AccessDeniedException("You are not authorized to view this saving");
+	        }
+
+	        SavingResponseDto responseDto = mapToDto(saving);
+	        return ApiResponse.success(responseDto, "Expense fetched successfully", HttpStatus.OK);
+		
+		
+		
+	}
+	
+	@Override
+	public ResponseEntity<ResponseStructure<List<SavingResponseDto>>> getAllSaving(){
+		UserModel currentUser = getCurrentUser();
+		
+		List<SavingsModel> saving = savingRepo.findByOwnerId(currentUser.getId());
+		
+		 List<SavingResponseDto> savingDto = saving.stream()                                     
+		         .map(this::mapToDto)                                                                 
+		         .collect(Collectors.toList());                                                       
+		                                                                                              
+		 return ApiResponse.success(savingDto, "All Saving fetched successfully", HttpStatus.OK); 
+		                                                                                              			
+	}
+	
+	
+	private SavingResponseDto mapToDto(SavingsModel s) {
+	    return new SavingResponseDto(
+	            s.getId(),
+	            s.getCategory(),
+	            s.getSource(),
+	            s.getSavedAmount(),
+	            s.getIcon(),
+	            s.getFileUrl(),
+	            s.getDate(),
+	            new SavingResponseDto.OwnerInfo(
+	                    s.getOwner().getId().toString(),
+	                    s.getOwner().getName()
+	            )
+	    );
+	}
+
 
 
 }
