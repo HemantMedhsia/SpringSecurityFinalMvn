@@ -13,11 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +25,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     private final UserRepo repo;
     private final ExpenseRepository expenseRepository;
-    
+
     private UserModel getCurrentUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         return repo.findByEmail(email)
@@ -34,7 +34,7 @@ public class ExpenseServiceImpl implements ExpenseService {
 
     @Override
     public ResponseEntity<ResponseStructure<ExpenseResponseDto>> createExpense(AddExpenseDto expenseDto) {
-    	UserModel currentUser = getCurrentUser();
+        UserModel currentUser = getCurrentUser();
 
         ExpenseModel expense = ExpenseModel.builder()
                 .title(expenseDto.title())
@@ -48,24 +48,8 @@ public class ExpenseServiceImpl implements ExpenseService {
                 .build();
 
         ExpenseModel savedExpense = expenseRepository.save(expense);
-
-        ExpenseResponseDto responseDto = new ExpenseResponseDto(
-                savedExpense.getId(),
-                savedExpense.getTitle(),
-                savedExpense.getAmount(),
-                savedExpense.getCategory(),
-                savedExpense.getDescription(),
-                savedExpense.getDate(),
-                savedExpense.getFileUrl(),
-                savedExpense.getIcon(),
-                new ExpenseResponseDto.OwnerInfo(
-                        currentUser.getId(),
-                        currentUser.getName()
-                )
-        );
-
-       
-        return  ApiResponse.success(responseDto, "creted successfully", HttpStatus.CREATED);
+        ExpenseResponseDto responseDto = mapToDto(savedExpense);
+        return ApiResponse.success(responseDto, "Expense created successfully", HttpStatus.CREATED);
     }
 
     @Override
@@ -74,9 +58,8 @@ public class ExpenseServiceImpl implements ExpenseService {
         UserModel currentUser = getCurrentUser();
         ExpenseModel expense = expenseRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Expense not found with id: " + id));
-
         if (!expense.getOwner().getId().equals(currentUser.getId())) {
-        	throw new AccessDeniedException("You are not authorized to modify this expense");
+            throw new AccessDeniedException("You are not authorized to modify this expense");
         }
 
         expense.setTitle(updatedExpense.title());
@@ -98,26 +81,58 @@ public class ExpenseServiceImpl implements ExpenseService {
     }
 
     @Override
-    public ResponseEntity<ResponseStructure<String>> deleteExpense(Long id) { return null; }
+    public ResponseEntity<ResponseStructure<ExpenseResponseDto>> deleteExpense(Long id) {
+        UserModel currentUser = getCurrentUser();
+        ExpenseModel expense = expenseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Expense not found with id: " + id));
+
+        if (!expense.getOwner().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You are not authorized to delete this expense");
+        }
+
+        expenseRepository.delete(expense);
+        return ApiResponse.success(null, "Expense deleted successfully", HttpStatus.OK);
+    }
 
     @Override
-    public ResponseEntity<ResponseStructure<ExpenseResponseDto>> getExpenseById(Long id) { return null; }
+    public ResponseEntity<ResponseStructure<ExpenseResponseDto>> getExpenseById(Long id) {
+        UserModel currentUser = getCurrentUser();
+        ExpenseModel expense = expenseRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Expense not found with id: " + id));
+
+        if (!expense.getOwner().getId().equals(currentUser.getId())) {
+            throw new AccessDeniedException("You are not authorized to view this expense");
+        }
+
+        ExpenseResponseDto responseDto = mapToDto(expense);
+        return ApiResponse.success(responseDto, "Expense fetched successfully", HttpStatus.OK);
+    }
 
     @Override
-    public ResponseEntity<ResponseStructure<List<ExpenseResponseDto>>> getAllExpenses() { return null; }
+    public ResponseEntity<ResponseStructure<List<ExpenseResponseDto>>> getAllExpenses() {
+        UserModel currentUser = getCurrentUser();
+
+        List<ExpenseModel> expenses = expenseRepository.findByOwnerId((currentUser.getId()));
+
+        List<ExpenseResponseDto> expenseDtos = expenses.stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+
+        return ApiResponse.success(expenseDtos, "All expenses fetched successfully", HttpStatus.OK);
+    }
 
     @Override
-    public ResponseEntity<ResponseStructure<List<ExpenseResponseDto>>> getExpensesByCategory(String category) { return null; }
+    public ResponseEntity<ResponseStructure<Double>> getTotalSpent() {
+        UserModel currentUser = getCurrentUser();
 
-    @Override
-    public ResponseEntity<ResponseStructure<List<ExpenseResponseDto>>> getExpensesBetweenDates(LocalDate startDate, LocalDate endDate) { return null; }
+        List<ExpenseModel> expenses = expenseRepository.findByOwnerId(currentUser.getId());
+        double total = expenses.stream()
+                .mapToDouble(ExpenseModel::getAmount)
+                .sum();
 
-    @Override
-    public ResponseEntity<ResponseStructure<Double>> getTotalSpent() { return null; }
+        return ApiResponse.success(total, "Total spent amount fetched successfully", HttpStatus.OK);
+    }
 
-    @Override
-    public ResponseEntity<ResponseStructure<Object>> getCategoryWiseSummary() { return null; }
-    
     private ExpenseResponseDto mapToDto(ExpenseModel e) {
         return new ExpenseResponseDto(
                 e.getId(),

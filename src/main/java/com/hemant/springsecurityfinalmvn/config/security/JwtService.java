@@ -23,7 +23,7 @@ public class JwtService {
     private String secret;
     @Value("${security.jwt.access-exp-minutes:10}")
     private long accessExpMinutes;
-    @Value("${security.jwt.refresh-exp-days:30}")
+    @Value("${security.jwt.refresh-exp-days:3}")
     private long refreshExpDays;
     @Value("${security.jwt.refresh-abs-exp-days:10}")
     private long refreshAbsExpDays;
@@ -63,8 +63,8 @@ public class JwtService {
     public String generateRefreshToken(UserDetails user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("type", "refresh");
-        claims.put("absoluteExp", Instant.now().plus(Duration.ofMinutes(5)).toEpochMilli());
-        return tokenBuilder(claims, user.getUsername(), Duration.ofMinutes(refreshExpDays));
+        claims.put("absoluteExp", Instant.now().plus(Duration.ofHours(5)).toEpochMilli());
+        return tokenBuilder(claims, user.getUsername(), Duration.ofDays(refreshExpDays));
     }
 
     public String extractUsername(String token) {
