@@ -1,11 +1,14 @@
 package com.hemant.springsecurityfinalmvn.controllers.saving;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,6 +52,37 @@ public class SavingController {
     	return savingService.getAllSaving();
     }
     
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<ResponseStructure<SavingResponseDto>> deleteExpense(
+            @PathVariable Long id
+    ) {
+        return savingService.deleteSaving(id);
+    }
     
+    @PutMapping("/update/{id}")
+    public ResponseEntity<ResponseStructure<SavingResponseDto>> updateSaving(
+            @PathVariable Long id,
+            @RequestBody AddSavingDto updatedSaving
+    ) {
+        return savingService.updateSaving(id, updatedSaving);
+    }
+    
+    @GetMapping("/total")
+    public ResponseEntity<ResponseStructure<Double>> getTotalSaving() {
+        return savingService.getTotalSaving();
+    }
+
+    @GetMapping("/monthly")
+    public ResponseEntity<ResponseStructure<Map<String, Double>>> getSavingByMonth() {
+        return savingService.getSavingByMonth();
+    }
+
+    
+    @GetMapping("/month/{monthName}")
+    public ResponseEntity<ResponseStructure<Double>> getSavingSumByMonth(@PathVariable String monthName) {
+        return savingService.getSavingSumByMonth(monthName);
+    }
+
+
     
 }
