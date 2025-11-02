@@ -108,7 +108,6 @@ public class ExpenseServiceImpl implements ExpenseService {
         UserModel currentUser = getCurrentUser();
 
         List<ExpenseModel> expenses = expenseRepository.findByOwnerId((currentUser.getId()));
-
         List<ExpenseResponseDto> expenseDtos = expenses.stream()
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
