@@ -1,10 +1,13 @@
 package com.hemant.springsecurityfinalmvn.controllers.auth;
 
 import com.hemant.springsecurityfinalmvn.dtos.auth.AuthRequest;
+import com.hemant.springsecurityfinalmvn.dtos.auth.ForgotPasswordRequest;
 import com.hemant.springsecurityfinalmvn.dtos.auth.RegisterRequest;
+import com.hemant.springsecurityfinalmvn.dtos.auth.ResetPasswordRequest;
 import com.hemant.springsecurityfinalmvn.dtos.user.UserResponseDto;
 import com.hemant.springsecurityfinalmvn.models.ResponseStructure;
 import com.hemant.springsecurityfinalmvn.services.AuthService.AuthService;
+import com.hemant.springsecurityfinalmvn.services.AuthService.ForgetPasswordService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +21,7 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final ForgetPasswordService forgetPasswordService;
 
     @PostMapping("/register")
     public ResponseEntity<ResponseStructure<UserResponseDto>> registerUser(@RequestBody RegisterRequest user) {
@@ -40,5 +44,14 @@ public class AuthController {
         return authService.logoutUser();
     }
 
+    @PostMapping("/forget-password")
+    public ResponseEntity<ResponseStructure<String>> forgetPassword(@RequestBody ForgotPasswordRequest request){
+        return forgetPasswordService.generateTokenAndSendEmail(request);
+    }
+
+    @PostMapping("/reset-password")
+    public  ResponseEntity<ResponseStructure<String>> resetPassword(@RequestBody ResetPasswordRequest request){
+        return forgetPasswordService.resetPassword(request);
+    }
 
 }

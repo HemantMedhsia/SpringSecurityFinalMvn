@@ -34,10 +34,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
-public class AuthServiceImpl implements AuthService{
+public class AuthServiceImpl implements AuthService {
     private final UserRepo userRepo;
     private final UserDetailsService userDetailsService;
-    private final JwtService  jwtService;
+    private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
     @Override
@@ -91,21 +91,21 @@ public class AuthServiceImpl implements AuthService{
     }
 
 
-	@Override
-	public ResponseEntity<ResponseStructure<UserResponseDto>> loginUser(AuthRequest req) {
-		
-		try {
-			authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(req.email().toLowerCase(), req.password()));
+    @Override
+    public ResponseEntity<ResponseStructure<UserResponseDto>> loginUser(AuthRequest req) {
+
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(req.email().toLowerCase(), req.password()));
         } catch (BadCredentialsException e) {
             throw e;
         }
 
         UserModel fetchUser = userRepo.findByEmail(req.email()
-        		.toLowerCase())
-        		.orElseThrow(() -> 
-        			new UsernameNotFoundException(
-                        "Unable to fetch user with email(" + req.email() + ")"
-                ));
+                        .toLowerCase())
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(
+                                "Unable to fetch user with email(" + req.email() + ")"
+                        ));
 
         UserDetails user = userDetailsService.loadUserByUsername(req.email().toLowerCase());
         String access = jwtService.generateAccessToken(user);
@@ -113,7 +113,7 @@ public class AuthServiceImpl implements AuthService{
 
         ResponseCookie accessCookie = ResponseCookie.from("access_token", access)
                 .httpOnly(true)
-                .secure(true)	
+                .secure(true)
                 .sameSite("None")
                 .path("/")
                 .maxAge(Duration.ofMinutes(1))
@@ -128,16 +128,16 @@ public class AuthServiceImpl implements AuthService{
                 .build();
 
         return ApiResponse.successWithCookie(
-        		new UserResponseDto(fetchUser.getId(), fetchUser.getName(), fetchUser.getEmail(), fetchUser.getRole()),
+                new UserResponseDto(fetchUser.getId(), fetchUser.getName(), fetchUser.getEmail(), fetchUser.getRole()),
                 "User login successfully",
                 HttpStatus.OK,
                 accessCookie,
                 refreshCookie
         );
-	}
-	
+    }
 
-	@Override
+
+    @Override
     public ResponseEntity<ResponseStructure<Object>> refreshAccessToken(String refreshToken) {
 
         if (refreshToken == null) {
@@ -157,9 +157,9 @@ public class AuthServiceImpl implements AuthService{
 
         String username = claims.getSubject();
         UserDetails user = userDetailsService.loadUserByUsername(username);
-        
-        if(user == null) {
-        	throw new BadCredentialsException("User not found in the token");
+
+        if (user == null) {
+            throw new BadCredentialsException("User not found in the token");
         }
 
         if (!jwtService.isTokenValid(refreshToken, user)) {
@@ -186,10 +186,10 @@ public class AuthServiceImpl implements AuthService{
 
     @Override
     public ResponseEntity<Map<String, String>> logoutUser() {
-    	
-    	Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    	
-    	if (authentication == null || !authentication.isAuthenticated()) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", "No authenticated user found"));
         }
@@ -201,7 +201,7 @@ public class AuthServiceImpl implements AuthService{
             userRepo.save(user);
         });
 
-    	
+
         ResponseCookie clearAccessCookie = ResponseCookie.from("access_token", "")
                 .httpOnly(true)
                 .secure(true)
@@ -220,20 +220,16 @@ public class AuthServiceImpl implements AuthService{
 
         return ResponseEntity.ok()
                 .header(
-                		HttpHeaders.SET_COOKIE, 
-                		clearAccessCookie.toString(), 
-                		clearRefreshCookie.toString())
+                        HttpHeaders.SET_COOKIE,
+                        clearAccessCookie.toString(),
+                        clearRefreshCookie.toString())
                 .body(
-                		Map.of(
-                				"message", 
-                				"Logout successful"
-                				)
-                		);
+                        Map.of(
+                                "message",
+                                "Logout successful"
+                        )
+                );
     }
-    
-    
-    
-    
-    
-    
+
+
 }
