@@ -2,6 +2,7 @@ package com.hemant.springsecurityfinalmvn.controllers.income;
 
 import com.hemant.springsecurityfinalmvn.dtos.income.IncomeRequest;
 import com.hemant.springsecurityfinalmvn.dtos.income.IncomeResponse;
+import com.hemant.springsecurityfinalmvn.models.ResponseStructure;
 import com.hemant.springsecurityfinalmvn.services.IncomeService.IncomeService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -48,5 +49,10 @@ public class IncomeController {
     public ResponseEntity<Void> deleteIncome(@PathVariable Long id) {
         incomeService.deleteIncome(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/total")
+    public ResponseEntity<ResponseStructure<Double>> getTotalSpent() {
+        return incomeService.getTotalSpent();
     }
 }

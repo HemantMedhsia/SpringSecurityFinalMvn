@@ -70,7 +70,7 @@ public class AuthServiceImpl implements AuthService {
                 .secure(true)
                 .sameSite("None")
                 .path("/")
-                .maxAge(Duration.ofMinutes(15))
+                .maxAge(Duration.ofMinutes(10))
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refreshToken)
@@ -116,7 +116,7 @@ public class AuthServiceImpl implements AuthService {
                 .secure(true)
                 .sameSite("None")
                 .path("/")
-                .maxAge(Duration.ofMinutes(1))
+                .maxAge(Duration.ofMinutes(10))
                 .build();
 
         ResponseCookie refreshCookie = ResponseCookie.from("refresh_token", refresh)
@@ -124,7 +124,7 @@ public class AuthServiceImpl implements AuthService {
                 .secure(true)
                 .sameSite("None")
                 .path("/")
-                .maxAge(Duration.ofMinutes(3))
+                .maxAge(Duration.ofHours(1))
                 .build();
 
         return ApiResponse.successWithCookie(
@@ -173,7 +173,7 @@ public class AuthServiceImpl implements AuthService {
                 .secure(true)
                 .sameSite("None")
                 .path("/")
-                .maxAge(Duration.ofMinutes(15))
+                .maxAge(Duration.ofMinutes(10))
                 .build();
 
         return ApiResponse.successWithCookie(

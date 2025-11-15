@@ -11,6 +11,7 @@ import com.hemant.springsecurityfinalmvn.services.expense.ExpenseService;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/expense")
@@ -54,5 +55,25 @@ public class ExpenseController {
     @GetMapping("/total")
     public ResponseEntity<ResponseStructure<Double>> getTotalSpent() {
         return expenseService.getTotalSpent();
+    }
+
+    @GetMapping("/current-month")
+    public ResponseEntity<ResponseStructure<List<ExpenseResponseDto>>> getCurrentMonthExpenses() {
+        return expenseService.getCurrentMonthExpenses();
+    }
+
+    @GetMapping("/current-month-total")
+    public ResponseEntity<ResponseStructure<Double>> getCurrentMonthTotal() {
+        return expenseService.getCurrentMonthTotal();
+    }
+
+    @GetMapping("/category-totals")
+    public ResponseEntity<ResponseStructure<List<Map<String, Object>>>> getCategoryTotals() {
+        return expenseService.getCategoryTotals();
+    }
+
+    @GetMapping("/trend")
+    public ResponseEntity<ResponseStructure<List<Map<String, Object>>>> trend() {
+        return expenseService.getLast6MonthsTrend();
     }
 }

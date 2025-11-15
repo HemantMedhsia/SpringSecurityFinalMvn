@@ -3,11 +3,13 @@ package com.hemant.springsecurityfinalmvn.services.IncomeService;
 import com.hemant.springsecurityfinalmvn.dtos.income.IncomeRequest;
 import com.hemant.springsecurityfinalmvn.dtos.income.IncomeResponse;
 import com.hemant.springsecurityfinalmvn.models.IncomeModel;
+import com.hemant.springsecurityfinalmvn.models.ResponseStructure;
 import com.hemant.springsecurityfinalmvn.models.UserModel;
 
 import com.hemant.springsecurityfinalmvn.repos.IncomeRepository;
 import com.hemant.springsecurityfinalmvn.repos.UserRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -78,6 +80,11 @@ public class IncomeServiceImpl implements IncomeService {
         IncomeModel income = incomeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Income not found with ID: " + id));
         return toResponse(income);
+    }
+
+    @Override
+    public ResponseEntity<ResponseStructure<Double>> getTotalSpent() {
+        return null;
     }
 
     private IncomeResponse toResponse(IncomeModel income) {
